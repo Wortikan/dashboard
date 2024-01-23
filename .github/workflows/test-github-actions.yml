@@ -1,23 +1,44 @@
-name: GitHub Actions Demo
+name: Push-to-EC2
+
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+
 jobs:
-  init:
+  deploy:
+    name: Deploy to EC2 on master branch push
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-varsion: [ 18.x ]
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout the files
+        uses: actions/checkout@v4
+
       - name: Staring Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - name: useless checks
-        run: pwd
-      - name: Listing contents
-        run: ls -lah
-      - name: check node version
-        run: node --version
-      
+
+      - name: Deploy to Server 1
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
+
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo apt-get -y update
+            ls -lah
+            pwd
+            whoami
+            node --version
