@@ -1,9 +1,9 @@
-name: Push-to-EC2
+name: Build and publish package
 
 on:
   push:
     branches:
-      - master
+      - development
 
 jobs:
   deploy:
@@ -21,24 +21,20 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      
+      - name: Installing dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
 
       # - name: Deploy to Server 1
       #   uses: easingthemes/ssh-deploy@main
-      #   env:
+      #   with:
       #     SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
       #     REMOTE_HOST: ${{ secrets.HOST_DNS }}
       #     REMOTE_USER: ${{ secrets.USERNAME }}
-      #     TARGET: ${{ secrets.TARGET_DIR }}
-
-      - name: Executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST_DNS }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            sudo apt-get -y update
-            ls -lah
-            pwd
-            whoami
-            node --version
+      #     SOURCE: ".output/"
+      #     TARGET: "/var/www/landing"
+      #     SCRIPT_AFTER: | 
+      #       pm2 reload all
