@@ -1,13 +1,13 @@
-name: Build and publish package
+name: Production build and publish package
 
 on:
   push:
     branches:
-      - development
+      - production
 
 jobs:
   deploy:
-    name: Deploy to EC2 on master branch push
+    name: Build and push to production
     runs-on: ubuntu-latest
     strategy:
       matrix:

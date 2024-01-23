@@ -1,0 +1,40 @@
+name: Sandbox build and publish package
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  deploy:
+    name: Build and push to sandbox
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-varsion: [ 18.x ]
+
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v4
+
+      - name: Staring Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Installing dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      # - name: Deploy to Server 1
+      #   uses: easingthemes/ssh-deploy@main
+      #   with:
+      #     SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+      #     REMOTE_HOST: ${{ secrets.HOST_DNS }}
+      #     REMOTE_USER: ${{ secrets.USERNAME }}
+      #     SOURCE: ".output/"
+      #     TARGET: "/var/www/landing"
+      #     SCRIPT_AFTER: | 
+      #       pm2 reload all
